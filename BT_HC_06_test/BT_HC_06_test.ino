@@ -7,29 +7,35 @@
   Serial.println("AT+PINxxxx      Imposta il pincode del modulo bluetooth (es.1234)");*/
 #include <SoftwareSerial.h>
 
-#define  BT_RX 10            // PIN to receive from bluetooth
-#define  BT_TX 11            // PIN TO transmit to bluetooth
+#define  BT_RX 12            // PIN to receive from bluetooth
+#define  BT_TX 13            // PIN TO transmit to bluetooth
 
 SoftwareSerial btSerial(BT_RX, BT_TX);
-
+String BT_message;
 void setup()
 {
+ // BT setup
  delay (2000);
- //
+ BT_message = "";
  Serial.begin(9600);        // Initialize USB Serial port
- //
  btSerial.begin(9600);    // Initialize Bluetooth SoftwareSerial port for selected data speed
- //
- Serial.println("--- Ports ready ---");
+ Serial.println("--- BT Ports ready ---");
  Serial.println("");
- //
+
 }
 
 void loop()
 {
- if (btSerial.available() > 0) Serial.write(btSerial.read());
+ if (BT_message.indexOf("!") > -1) {
+  Serial.println(BT_message);
+  BT_message = "";
+ }
+ if (btSerial.available() > 0) { 
+    BT_message.concat((char) btSerial.read());
+    //Serial.println(BT_message); // ONLY FOR debugging purposes
+ } 
  if (Serial.available() > 0) btSerial.write(Serial.read());
+ 
 }
-
 
 
