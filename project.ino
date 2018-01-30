@@ -223,7 +223,17 @@ void parseCommand(String BT_message) {
     if (BT_message == "stop!") ferma();
     if (BT_message == "sinistra!") curvaSx();
   }
-
+    if (BT_message.indexOf("sveglia")>-1) {  //Controlla se la stringa "sveglia" è presente in BT_message; se lo è, entra in modalità sveglia
+      Sveglia=true;
+      String s_ore="";
+      String s_minuti="";
+      BT_message.remove(0, 7); //Rimuove "sveglia" dalla stringa così restano solo le ore e i minuti
+      BT_message.getBytes(s_ore, 2);
+      BT_message.remove(0, 3);
+      BT_message.getBytes(s_minuti, 2);
+      Svegliaore=s_ore.toInt();
+      Svegliaminuti=s_minuti.toInt();
+       }
 }
 
 
