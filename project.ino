@@ -21,7 +21,7 @@ int in4 = 6;
 
 // Self-drive & proximity sensor part
 int state = 4; // stop
-int nxtState = 0; // avanti
+int nxtState = 4; // avanti
 bool X=true,D=true,S=true;
 const int trig = A5;
 int echo[3];
@@ -38,8 +38,8 @@ void indietro(){
   //ruote a destra all'indietro
   digitalWrite(in3, LOW);
   digitalWrite(in4, HIGH);
-  analogWrite(enA, 50);
-  analogWrite(enB, 50);
+  analogWrite(enA, 30);
+  analogWrite(enB, 30);
   //delay(1000);
 
   
@@ -53,8 +53,8 @@ void avanti(){
   //ruote a destra in avanti
   digitalWrite(in3, HIGH);
   digitalWrite(in4, LOW);
-  analogWrite(enA, 100);
-  analogWrite(enB, 100);
+  analogWrite(enA, 30);
+  analogWrite(enB, 30);
   //delay(1000);
 }
 
@@ -67,8 +67,8 @@ void curvaSx(){
   digitalWrite(in3, HIGH);
   digitalWrite(in4, LOW);
   // per quanto riguarda la velocità, non ho la minima idea: facciamo curvare per un tempo indicativo T=1000 e poi fermiamo
-  analogWrite(enA, 33);
-  analogWrite(enB, 33);
+  analogWrite(enA, 10);
+  analogWrite(enB, 10);
   //delay(1000);
 }
 
@@ -81,8 +81,8 @@ void curvaDx(){
    digitalWrite(in3, LOW);
   digitalWrite(in4, HIGH);
    // per quanto riguarda la velocità, non ho la minima idea, facciamo curvare per un tempo indicativo T=1000 ms e poi fermiamo
-  analogWrite(enA, 33);
-  analogWrite(enB, 33);
+  analogWrite(enA, 10);
+  analogWrite(enB, 10);
   //delay(1000);
 }
 
@@ -153,11 +153,14 @@ void call(int state) {
 }
 
 void getDangers() {
-  long dX, dD, dS;
+  long dX=0, dD=0, dS=0;
+  X=0; D=0; S=0;
+  for (int i=0; i<3; i++) {
   dX =measureCm(2); dD = measureCm(1); dS = measureCm(0);
-  X = (dX > 10);
-  D = (dD > 10);
-  S = (dS > 10);
+    X = X || (dX > 20);
+    D = D || (dD > 20);
+    S = S || (dS > 20);
+  }
   Serial.print("distance X "); Serial.println(dX);
 }
 
@@ -211,6 +214,7 @@ void parseCommand(String BT_message) {
   if (BT_message == "drive!") {
     selfDrive = 1;
     nxtState = 0;
+    call(0);
   } else {
     selfDrive = 0;
     if (BT_message == "avanti!") avanti();
@@ -266,13 +270,13 @@ Serial.println(selfDrive);
     BT_message.concat((char) btSerial.read());
     //Serial.println(BT_message); // ONLY FOR debugging purposes
  } 
- if (Serial.available() > 0) btSerial.write(Serial.read());
+ //if (Serial.available() > 0) btSerial.write(Serial.read());
   
 // Self Drive part
   if (selfDrive) {
    if (state != nxtState) call(nxtState); // se lo stato è diverso da quello precedente allora devo chiamare la funzione corrispondente, altrimenti no
    // dopodichè calcolo il nuovo nxtState
-   getDangers(); //  questa funzione mi deve settare tutti i valori X,S,D
+   //getDangers(); //  questa funzione mi deve settare tutti i valori X,S,D
    state = nxtState;
    nxtState = nxtStateLogic(state);
   }
