@@ -25,7 +25,7 @@ int nxtState = 4; // avanti
 bool X=true,D=true,S=true;
 const int trig = A5;
 int echo[3];
-bool selfDrive = true;
+bool selfDrive = false;
 
 /**** Custom functions ****/ 
 
@@ -138,12 +138,14 @@ void call(int state) {
     avanti();
     break;
     case 1:
+    indietro(); delay(1000);
     curvaDx();
     break;
     case 2:
     indietro();
     break;
     case 3:
+    indietro(); delay(1000);
     curvaSx();
     break;
     case 4:
@@ -155,13 +157,16 @@ void call(int state) {
 void getDangers() {
   long dX=0, dD=0, dS=0;
   X=0; D=0; S=0;
-  for (int i=0; i<3; i++) {
-  dX =measureCm(2); dD = measureCm(1); dS = measureCm(0);
+  //for (int i=0; i<3; i++) {
+  dX =measureCm(2); dD = measureCm(1); dS = measureCm(0); // misuro le distanze nelle tre direzioni
+  dX = (dX > 0) ? dX : 21; dD = (dD > 0) ? dD : 21; dS = (dS > 0) ? dS : 21; // verifico che siano maggiori di zero, altrimenti assumo che valgano 21 (valore un po' pericoloso)
     X = X || (dX > 20);
     D = D || (dD > 20);
     S = S || (dS > 20);
-  }
+  //}
   Serial.print("distance X "); Serial.println(dX);
+  Serial.print("distance D "); Serial.println(dD);
+  Serial.print("distance S "); Serial.println(dS);
 }
 
 int nxtStateLogic(int state) {
@@ -223,17 +228,7 @@ void parseCommand(String BT_message) {
     if (BT_message == "stop!") ferma();
     if (BT_message == "sinistra!") curvaSx();
   }
-    if (BT_message.indexOf("sveglia")>-1) {  //Controlla se la stringa "sveglia" è presente in BT_message; se lo è, entra in modalità sveglia
-      Sveglia=true;
-      String s_ore="";
-      String s_minuti="";
-      BT_message.remove(0, 7); //Rimuove "sveglia" dalla stringa così restano solo le ore e i minuti
-      BT_message.getBytes(s_ore, 2);
-      BT_message.remove(0, 3);
-      BT_message.getBytes(s_minuti, 2);
-      Svegliaore=s_ore.toInt();
-      Svegliaminuti=s_minuti.toInt();
-       }
+
 }
 
 
@@ -269,7 +264,7 @@ void setup() {
 
 /**** Loop part ***/
 void loop() {
-Serial.println(selfDrive);
+if (selfDrive) Serial.println(selfDrive);
 // BT part
  if (BT_message.indexOf("!") > -1) {
   Serial.println(BT_message);
@@ -286,7 +281,7 @@ Serial.println(selfDrive);
   if (selfDrive) {
    if (state != nxtState) call(nxtState); // se lo stato è diverso da quello precedente allora devo chiamare la funzione corrispondente, altrimenti no
    // dopodichè calcolo il nuovo nxtState
-   //getDangers(); //  questa funzione mi deve settare tutti i valori X,S,D
+   getDangers(); //  questa funzione mi deve settare tutti i valori X,S,D
    state = nxtState;
    nxtState = nxtStateLogic(state);
   }
