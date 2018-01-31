@@ -18,7 +18,7 @@ int in2 = 8;
 int enB = 5; //enB ruote a destra
 int in3 = 7; 
 int in4 = 6;
-int BuzzPin=1;
+int BuzzPin=2;
 
 //da acquisire dopo quante ore e minuti si vuole far partire la sveglia
 int SvegliaOre;
@@ -167,13 +167,13 @@ void call(int state) {
 void getDangers() {
   long dX=0, dD=0, dS=0;
   X=0; D=0; S=0;
-  //for (int i=0; i<3; i++) {
+  for (int i=0; i<3; i++) {
   dX =measureCm(2); dD = measureCm(1); dS = measureCm(0); // misuro le distanze nelle tre direzioni
   dX = (dX > 0) ? dX : 21; dD = (dD > 0) ? dD : 21; dS = (dS > 0) ? dS : 21; // verifico che siano maggiori di zero, altrimenti assumo che valgano 21 (valore un po' pericoloso)
     X = X || (dX > 20);
     D = D || (dD > 20);
     S = S || (dS > 20);
-  //}
+  }
   Serial.print("distance X "); Serial.println(dX);
   Serial.print("distance D "); Serial.println(dD);
   Serial.print("distance S "); Serial.println(dS);
@@ -223,13 +223,19 @@ int nxtStateLogic(int state) {
   }
   return nxtState;
 }
+
+// Funzione che setta le variabili globali per farlo entrare nel self drive
+void initSelfDrive() {
+    selfDrive = 1;
+    nxtState = 0;
+    call(0);
+  
+}
 /***** BT functions Part *****/
 
 void parseCommand(String BT_message) {
   if (BT_message == "drive!") {
-    selfDrive = 1;
-    nxtState = 0;
-    call(0);
+    initSelfDrive();
   } else {
     selfDrive = 0;
     if (BT_message == "avanti!") avanti();
@@ -245,12 +251,13 @@ void parseCommand(String BT_message) {
       Sveglia=true;
       String s_ore="";
       String s_minuti="";
-      BT_message.remove(0, 7); //Rimuove "sveglia" dalla stringa così restano solo le ore e i minuti
-      BT_message.getBytes(s_ore, 2);
-      BT_message.remove(0, 3);
-      BT_message.getBytes(s_minuti, 2);
-      Svegliaore=s_ore.toInt();
-      Svegliaminuti=s_minuti.toInt();
+      //BT_message.remove(0, 7); //Rimuove "sveglia" dalla stringa così restano solo le ore e i minuti
+      s_ore = BT_message.substring(8, 10);
+      s_minuti = BT_message.substring(12, 14);
+      SvegliaOre=s_ore.toInt();
+      SvegliaMinuti=s_minuti.toInt();
+      Serial.println(SvegliaOre);
+      Serial.println(SvegliaMinuti);
        }
   
 }
@@ -305,19 +312,20 @@ if (selfDrive) Serial.println(selfDrive);
 
  //Qua la parte della Sveglia
  if (Sveglia) {
-
-   for (i=0; i<=23; 1++){
+  int i,j,k;
+   for (i=0; i<=23; i++){
     for (j=0; j<=59; j++){
        Ore=i;
        Minuti=j;
        for(k=0; k<=59; k++){
-        delay(1000)
+        delay(1000);
        }
           k=0;
          
-       if(SvegliOre==Ore && SvegliaMinuti==Minuti){
-        selfDrive=1;
+       if(SvegliaOre==Ore && SvegliaMinuti==Minuti){
+        initSelfDrive();
         Buzz=1;
+        Sveglia=false;
         j=60;
         i=24;
        }
@@ -345,7 +353,7 @@ if (selfDrive) Serial.println(selfDrive);
    //qua ci metto una componente per fare il buzz. Buzz=1 solo se il mode sveglia è attivo. Il buzz uscira dal pin 2. Quando è alto fa casino, quando è basso non lo fa
    if (Buzz) {
 
-          BuzzState=!BuzzState //va da o a 1
+          BuzzState=!BuzzState; //va da o a 1
           digitalWrite(BuzzPin, BuzzState);
     
         }
@@ -355,5 +363,7 @@ if (selfDrive) Serial.println(selfDrive);
 
    
   }
-  
+
 }
+  
+
