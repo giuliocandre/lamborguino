@@ -5,7 +5,7 @@ The final goal is to have a programmable wake-up alarm which triggers a self-dri
 
 ## Wiring and Components
 
-![wiring scheme]{https://raw.githubusercontent.com/giuliocandre/lamborguino/master/wiring.jpg
+![wiring scheme](wiring.jpg)
 * 2x 9V batteries
 * HC-06 bluetooth module
 * L298n motor bridge
