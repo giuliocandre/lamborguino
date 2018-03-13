@@ -11,6 +11,8 @@ The final goal is to have a programmable wake-up alarm which triggers a self-dri
 * L298n motor bridge
 * 3x ultrasonic proximity sensors
 * 1 piezo speaker (aka buzzer)
+* 4x DC motors with wheels (only 2 are shown in the wiring scheme)
+
 To commmunicate with the bluetooth module, one can use the "Android HC-06 terminal" application, available on the Play Store.
 
 ## Code description
